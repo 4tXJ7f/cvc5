@@ -8,8 +8,7 @@ this lab build on each other, so it is advisable to follow them in order.
 
 ## Getting the Source Code and Compiling CVC4
 
-Use [Git](https://git-scm.com/) to clone this repository and use `git checkout
-assignment3` to use the branch that corresponds to this assignment.
+Use [Git](https://git-scm.com/) to clone this repository and use `git checkout --track origin/assignment3` to use the branch that corresponds to this assignment.
 
 Before we get started, we have to compile CVC4. CVC4 can currently be compiled
 on Linux and macOS. It can be cross-compiled for Windows but compilation on
