@@ -37,12 +37,18 @@ NonlinearExtension::NonlinearExtension(TheoryArith& containing,
       d_containing(containing),
       d_ee(ee),
       d_needsLastCall(false),
+      d_extTheory(&containing),
       d_model(containing.getSatContext()),
       d_trSlv(d_model),
       d_nlSlv(containing, d_model),
       d_iandSlv(containing, d_model),
       d_builtModel(containing.getSatContext(), false)
 {
+  d_extTheory.addFunctionKind(kind::NONLINEAR_MULT);
+  d_extTheory.addFunctionKind(kind::EXPONENTIAL);
+  d_extTheory.addFunctionKind(kind::SINE);
+  d_extTheory.addFunctionKind(kind::PI);
+  d_extTheory.addFunctionKind(kind::IAND);
   d_true = NodeManager::currentNM()->mkConst(true);
   d_zero = NodeManager::currentNM()->mkConst(Rational(0));
   d_one = NodeManager::currentNM()->mkConst(Rational(1));
@@ -50,6 +56,13 @@ NonlinearExtension::NonlinearExtension(TheoryArith& containing,
 }
 
 NonlinearExtension::~NonlinearExtension() {}
+
+void NonlinearExtension::preRegisterTerm(TNode n)
+{
+  // register terms with extended theory, to find extended terms that can be
+  // eliminated by context-depedendent simplification.
+  d_extTheory.registerTermRec(n);
+}
 
 bool NonlinearExtension::getCurrentSubstitution(
     int effort,
@@ -152,7 +165,8 @@ void NonlinearExtension::sendLemmas(const std::vector<NlLemma>& out)
   {
     Node lem = nlem.d_lemma;
     bool preprocess = nlem.d_preprocess;
-    Trace("nl-ext-lemma") << "NonlinearExtension::Lemma : " << lem << std::endl;
+    Trace("nl-ext-lemma") << "NonlinearExtension::Lemma : " << nlem.d_id
+                          << " : " << lem << std::endl;
     d_containing.getOutputChannel().lemma(lem, false, preprocess);
     // process the side effect
     processSideEffect(nlem);
@@ -165,6 +179,7 @@ void NonlinearExtension::sendLemmas(const std::vector<NlLemma>& out)
     {
       d_lemmas.insert(lem);
     }
+    d_stats.d_inferences << nlem.d_id;
     // also indicate this is a tautology
     d_model.addTautology(lem);
   }
@@ -188,7 +203,7 @@ unsigned NonlinearExtension::filterLemma(NlLemma lem, std::vector<NlLemma>& out)
         << "NonlinearExtension::Lemma duplicate : " << lem.d_lemma << std::endl;
     return 0;
   }
-  out.push_back(lem);
+  out.emplace_back(lem);
   return 1;
 }
 
@@ -405,6 +420,8 @@ int NonlinearExtension::checkLastCall(const std::vector<Node>& assertions,
 {
   std::vector<NlLemma> lemmas;
 
+  ++(d_stats.d_checkRuns);
+
   if (options::nlExt())
   {
     // initialize the non-linear solver
@@ -592,12 +609,12 @@ void NonlinearExtension::check(Theory::Effort e)
                   << ", built model = " << d_builtModel.get() << std::endl;
   if (e == Theory::EFFORT_FULL)
   {
-    d_containing.getExtTheory()->clearCache();
+    d_extTheory.clearCache();
     d_needsLastCall = true;
     if (options::nlExtRewrites())
     {
       std::vector<Node> nred;
-      if (!d_containing.getExtTheory()->doInferences(0, nred))
+      if (!d_extTheory.doInferences(0, nred))
       {
         Trace("nl-ext") << "...sent no lemmas, # extf to reduce = "
                         << nred.size() << std::endl;
@@ -639,6 +656,8 @@ void NonlinearExtension::check(Theory::Effort e)
 
 bool NonlinearExtension::modelBasedRefinement(std::vector<NlLemma>& mlems)
 {
+  ++(d_stats.d_mbrRuns);
+
   // get the assertions
   std::vector<Node> assertions;
   getAssertions(assertions);
@@ -647,10 +666,11 @@ bool NonlinearExtension::modelBasedRefinement(std::vector<NlLemma>& mlems)
       << "Getting model values... check for [model-false]" << std::endl;
   // get the assertions that are false in the model
   const std::vector<Node> false_asserts = checkModelEval(assertions);
+  Trace("nl-ext") << "# false asserts = " << false_asserts.size() << std::endl;
 
   // get the extended terms belonging to this theory
   std::vector<Node> xts;
-  d_containing.getExtTheory()->getTerms(xts);
+  d_extTheory.getTerms(xts);
 
   if (Trace.isOn("nl-ext-debug"))
   {
@@ -786,7 +806,8 @@ bool NonlinearExtension::modelBasedRefinement(std::vector<NlLemma>& mlems)
             d_containing.getOutputChannel().requirePhase(literal, true);
             Trace("nl-ext-debug") << "Split on : " << literal << std::endl;
             Node split = literal.orNode(literal.negate());
-            filterLemma(split, stvLemmas);
+            NlLemma nsplit(split, Inference::SHARED_TERM_VALUE_SPLIT);
+            filterLemma(nsplit, stvLemmas);
           }
           if (!stvLemmas.empty())
           {
