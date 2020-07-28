@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.2)
 #-----------------------------------------------------------------------------#
 # Project configuration
 
+message("hello")
+
 project(cvc4)
 
 set(CVC4_MAJOR   1) # Major component of the version of CVC4.

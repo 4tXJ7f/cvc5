@@ -87,7 +87,7 @@ void TheoryProxy::explainPropagation(SatLiteral l, SatClause& explanation) {
 
       Debug("pf::sat") << "TheoryProxy::explainPropagation: setting lemma recipe to: "
                        << std::endl;
-      proofRecipe->dump("pf::sat");
+      proofRecipe->dump("pf::satxx");
 
       delete proofRecipe;
       proofRecipe = NULL;
