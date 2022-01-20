@@ -89,8 +89,7 @@ void ArrayCoreSolver::checkNth(const std::vector<Node>& nthTerms)
       Node y = nthTerms[j][0];
       Node n = nthTerms[i][1];
       Node m = nthTerms[j][1];
-      if (d_state.areEqual(n, m) && !d_state.areEqual(x, y)
-          && !d_state.areDisequal(x, y))
+      if (!d_state.areEqual(x, y) && !d_state.areDisequal(x, y))
       {
         d_im.sendSplit(x, y, InferenceId::STRINGS_ARRAY_EQ_SPLIT);
       }
@@ -104,6 +103,7 @@ void ArrayCoreSolver::checkUpdate(const std::vector<Node>& updateTerms)
 
   Trace("seq-array-core-debug")
       << "number of update terms: " << updateTerms.size() << std::endl;
+
   for (const Node& n : updateTerms)
   {
     Trace("seq-array-core-debug") << "check term " << n << std::endl;
