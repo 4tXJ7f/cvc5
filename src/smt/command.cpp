@@ -1771,12 +1771,15 @@ void GetModelCommand::toStream(std::ostream& out,
 /* class BlockModelCommand */
 /* -------------------------------------------------------------------------- */
 
-BlockModelCommand::BlockModelCommand() {}
+BlockModelCommand::BlockModelCommand(api::BlockModelsMode mode) : d_mode(mode)
+{
+}
+
 void BlockModelCommand::invoke(api::Solver* solver, SymbolManager* sm)
 {
   try
   {
-    solver->blockModel();
+    solver->blockModel(d_mode);
     d_commandStatus = CommandSuccess::instance();
   }
   catch (api::CVC5ApiRecoverableException& e)
@@ -1795,7 +1798,7 @@ void BlockModelCommand::invoke(api::Solver* solver, SymbolManager* sm)
 
 Command* BlockModelCommand::clone() const
 {
-  BlockModelCommand* c = new BlockModelCommand();
+  BlockModelCommand* c = new BlockModelCommand(d_mode);
   return c;
 }
 

@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "api/cpp/cvc5_types.h"
 #include "context/cdhashmap_forward.h"
 #include "cvc5_export.h"
 #include "options/options.h"
@@ -232,7 +233,7 @@ class CVC5_EXPORT SolverEngine
    *
    * The return value has the same meaning as that of assertFormula.
    */
-  Result blockModel();
+  Result blockModel(api::BlockModelsMode mode);
 
   /**
    * Block the current model values of (at least) the values in exprs.

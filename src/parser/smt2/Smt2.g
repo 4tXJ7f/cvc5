@@ -101,6 +101,7 @@ namespace cvc5 {
 #include <vector>
 
 #include "api/cpp/cvc5.h"
+#include "api/cpp/cvc5_types.h"
 #include "base/output.h"
 #include "parser/antlr_input.h"
 #include "parser/parser.h"
@@ -1044,8 +1045,13 @@ extendedCommand[std::unique_ptr<cvc5::Command>* cmd]
       PARSER_STATE->defineVar(name, pool);
       cmd->reset(new DeclarePoolCommand(name, pool, t, terms));
     }
-  | BLOCK_MODEL_TOK { PARSER_STATE->checkThatLogicIsSet(); }
-    { cmd->reset(new BlockModelCommand()); }
+  | BLOCK_MODEL_TOK KEYWORD { PARSER_STATE->checkThatLogicIsSet(); }
+    {
+      api::BlockModelsMode mode =
+        PARSER_STATE->getBlockModelsMode(
+          AntlrInput::tokenText($KEYWORD).c_str() + 1);
+      cmd->reset(new BlockModelCommand(mode));
+    }
 
   | BLOCK_MODEL_VALUES_TOK { PARSER_STATE->checkThatLogicIsSet(); }
     ( LPAREN_TOK termList[terms,e] RPAREN_TOK
