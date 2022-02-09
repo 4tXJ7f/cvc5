@@ -475,9 +475,3 @@ cdef extern from "api/cpp/cvc5.h" namespace "cvc5::api::Result::UnknownExplanati
     cdef UnknownExplanation UNSUPPORTED
     cdef UnknownExplanation OTHER
     cdef UnknownExplanation UNKNOWN_REASON
-
-
-cdef extern from "api/cpp/cvc5_types.h" namespace "cvc5::api::BlockModelsMode":
-    cdef BlockModelsMode NONE
-    cdef BlockModelsMode LITERALS
-    cdef BlockModelsMode VALUES
