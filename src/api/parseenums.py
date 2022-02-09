@@ -13,7 +13,7 @@
 ##
 
 """
-This script implements KindsParser which
+This script implements EnumParser which
 parses the header file cvc5/src/api/cpp/cvc5_kind.h
 
 The script is aware of the '#if 0' pattern and will ignore
@@ -34,7 +34,7 @@ US = '_'
 NL = '\n'
 
 # Expected C++ Enum Declarations
-ENUM_START = 'enum Kind'
+ENUM_START = 'enum'
 ENUM_END = CCB + SC
 
 # Comments and Macro Tokens
@@ -54,40 +54,53 @@ replacements = {
 }
 
 
-class KindsParser:
+class CppEnum:
+    def __init__(self, name, is_class):
+        # The name of the enum
+        self.name = name
+        # True if the enum was defined as `enum class Foo`, false if it was defined as `enum Foo`
+        self.is_class = is_class
+        # dictionary from C++ value name to shortened name
+        self.values = OrderedDict()
+        # dictionary from shortened name to documentation comment
+        self.values_doc = OrderedDict()
+
+
+class EnumParser:
     tokenmap = {
         BLOCK_COMMENT_BEGIN: BLOCK_COMMENT_END,
         MACRO_BLOCK_BEGIN: MACRO_BLOCK_END
     }
 
     def __init__(self):
-        # dictionary from C++ Kind name to shortened name
-        self.kinds = OrderedDict()
-        # dictionary from shortened name to documentation comment
-        self.kinds_doc = OrderedDict()
+        self.enums = []
         # the end token for the current type of block
         # none if not in a block comment or macro
         self.endtoken = None
         # stack of end tokens
         self.endtoken_stack = []
         # boolean that is true when in the kinds enum
-        self.in_kinds = False
+        self.in_enum = False
         # latest block comment - used for kinds documentation
         self.latest_block_comment = ""
 
-    def get_comment(self, kind_name):
+    def get_current_enum(self):
+        return self.enums[-1]
+
+    def get_comment(self, value_name):
         '''
-        Look up a documentation comment for a Kind by name
+        Look up a documentation comment for a value by name
         Accepts both full C++ name and shortened name
         '''
+        enum = self.get_current_enum()
         try:
-            return self.kinds_doc[kind_name]
+            return enum.values_doc[value_name]
         except KeyError:
-            return self.kinds_doc[self.kinds[kind_name]]
+            return enum.values_doc[enum.kinds[value_name]]
 
     def format_name(self, name):
         '''
-        In the Python API, each Kind name is reformatted for easier use
+        In the Python API, each value name is reformatted for easier use
 
         The naming scheme is:
            1. capitalize the first letter of each word (delimited by underscores)
@@ -182,9 +195,9 @@ class KindsParser:
                 continue
 
             if ENUM_END in line:
-                self.in_kinds = False
+                self.in_enum = False
                 break
-            elif self.in_kinds:
+            elif self.in_enum:
                 if line == OCB:
                     continue
                 if EQ in line:
@@ -192,11 +205,18 @@ class KindsParser:
                 elif C in line:
                     line = line[:line.find(C)].strip()
                 fmt_name = self.format_name(line)
-                self.kinds[line] = fmt_name
+                enum = self.get_current_enum()
+                enum.values[line] = fmt_name
                 fmt_comment = self.format_comment(self.latest_block_comment)
-                self.kinds_doc[fmt_name] = fmt_comment
+                enum.values_doc[fmt_name] = fmt_comment
             elif ENUM_START in line:
-                self.in_kinds = True
+                self.in_enum = True
+                # Parse the enum name for enums of the form `enum Foo` as well
+                # as `enum class Foo`
+                tokens = line.split(" ")
+                is_class = tokens[1] == "class"
+                name = tokens[2] if is_class else tokens[1]
+                self.enums.append(CppEnum(name, is_class))
                 continue
         f.close()
 
