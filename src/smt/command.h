@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "api/cpp/cvc5.h"
+#include "api/cpp/cvc5_types.h"
 #include "cvc5_export.h"
 #include "options/language.h"
 
@@ -941,7 +942,7 @@ class CVC5_EXPORT GetModelCommand : public Command
 class CVC5_EXPORT BlockModelCommand : public Command
 {
  public:
-  BlockModelCommand();
+  BlockModelCommand(api::BlockModelsMode mode);
 
   void invoke(api::Solver* solver, SymbolManager* sm) override;
   Command* clone() const override;
@@ -950,6 +951,9 @@ class CVC5_EXPORT BlockModelCommand : public Command
                 int toDepth = -1,
                 size_t dag = 1,
                 Language language = Language::LANG_AUTO) const override;
+
+ private:
+  api::BlockModelsMode d_mode;
 }; /* class BlockModelCommand */
 
 /** The command to block model values. */

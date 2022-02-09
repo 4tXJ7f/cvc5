@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "api/cpp/cvc5.h"
+#include "api/cpp/cvc5_types.h"
 #include "parser/parse_op.h"
 #include "parser/parser.h"
 #include "theory/logic_info.h"
@@ -94,6 +95,8 @@ class Smt2 : public Parser
                           const std::string& name);
 
   api::Kind getOperatorKind(const std::string& name) const;
+
+  api::BlockModelsMode getBlockModelsMode(const std::string& mode);
 
   bool isOperatorEnabled(const std::string& name) const;
 

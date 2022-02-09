@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "api/cpp/cvc5_kind.h"
+#include "api/cpp/cvc5_types.h"
 
 namespace cvc5 {
 
@@ -4551,7 +4552,7 @@ class CVC5_EXPORT Solver
    * to a mode other than ``none``.
    * \endverbatim
    */
-  void blockModel() const;
+  void blockModel(BlockModelsMode mode) const;
 
   /**
    * Block the current model values of (at least) the values in terms. Can be
