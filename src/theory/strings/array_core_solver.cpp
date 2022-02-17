@@ -196,10 +196,12 @@ void ArrayCoreSolver::checkUpdate(const std::vector<Node>& updateTerms)
         d_im.addToExplanation(termProxy, n, exp);
         if (d_state.areEqual(r, n))
         {
-        d_im.addToExplanation(r, n, exp);
-        } else {
+          d_im.addToExplanation(r, n, exp);
+        }
+        else
+        {
           Assert(d_state.areEqual(r, n[0]));
-        d_im.addToExplanation(r, n[0], exp);
+          d_im.addToExplanation(r, n[0], exp);
         }
         sendInference(exp, lem, InferenceId::STRINGS_ARRAY_NTH_UPDATE);
       }
@@ -236,10 +238,10 @@ void ArrayCoreSolver::check(const std::vector<Node>& nthTerms,
   {
     // (seq.nth n[0] n[1])
     Node r = d_state.getRepresentative(n[0]);
-    Trace("seq-update") << "- " << r << ": " << n[1] << " -> " << n
-                        << std::endl;
-    d_writeModel[r][n[1]] = n;
-    d_indexMap[r].insert(n[1]);
+    Node ri = d_state.getRepresentative(n[1]);
+    Trace("seq-update") << "- " << r << ": " << ri << " -> " << n << std::endl;
+    d_writeModel[r][ri] = n;
+    d_indexMap[r].insert(ri);
 
     if (n[0].getKind() == STRING_REV)
     {
