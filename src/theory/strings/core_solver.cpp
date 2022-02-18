@@ -2451,6 +2451,13 @@ void CoreSolver::processDeqExtensionality(Node n1, Node n2)
   }
   else
   {
+    /*
+    if (n1.getKind() == STRING_UPDATE && n1[0] == n2) {
+      k = n1[1];
+    } else if (n2.getKind() == STRING_UPDATE && n2[0] == n1) {
+      k = n2[1];
+    }
+    */
     // as an optimization, for sequences, use seq.nth
     ss1 = nm->mkNode(SEQ_NTH, n1, k);
     ss2 = nm->mkNode(SEQ_NTH, n2, k);

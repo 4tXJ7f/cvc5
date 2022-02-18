@@ -198,7 +198,7 @@ void ArraySolver::checkTerm(Node t, bool checkInv)
     if (nf.d_nf.empty())
     {
       // updates should have been reduced (UPD_EMPTYSTR)
-      Assert(k != STRING_UPDATE);
+      // Assert(k != STRING_UPDATE);
       Trace("seq-array-debug") << "...empty" << std::endl;
       return;
     }
@@ -241,7 +241,7 @@ void ArraySolver::checkTerm(Node t, bool checkInv)
             thenBranch = nf.d_nf[0][0];
           }
           Node uf = SkolemCache::mkSkolemSeqNth(t[0].getType(), "Uf");
-          elseBranch = nm->mkNode(APPLY_UF, uf, t[0], t[1]);
+          elseBranch = t; // nm->mkNode(APPLY_UF, uf, t[0], t[1]);
           iid = InferenceId::STRINGS_ARRAY_NTH_UNIT;
         }
         std::vector<Node> exp;

@@ -149,6 +149,9 @@ void ArrayCoreSolver::checkUpdate(const std::vector<Node>& updateTerms)
       // ------------------------
       // 0 <= n < len(t) and nth(s, n) != nth(update(s, n, t)) ||
       // s = update(s, n, t)
+      TypeNode intType = nm->integerType();
+      SkolemCache* sc = d_termReg.getSkolemCache();
+      Node k = sc->mkSkolemFun(SkolemFunId::STRINGS_DEQ_DIFF, intType, n[0], n);
       lem = nm->mkNode(
           OR,
           nm->mkNode(AND,
@@ -189,7 +192,7 @@ void ArrayCoreSolver::checkUpdate(const std::vector<Node>& updateTerms)
             ITE, i.eqNode(j), updateVal, nm->mkNode(SEQ_NTH, n[0], j));
         Node uf = SkolemCache::mkSkolemSeqNth(n[0].getType(), "Uf");
         Node ufj = nm->mkNode(APPLY_UF, uf, n, j);
-        Node rhs = nm->mkNode(ITE, nthInBounds, iteNthInBounds, ufj);
+        Node rhs = nm->mkNode(ITE, nthInBounds, iteNthInBounds, nth);
         Node lem = nth.eqNode(rhs);
 
         std::vector<Node> exp;
