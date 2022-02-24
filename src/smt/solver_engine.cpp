@@ -740,6 +740,7 @@ Result SolverEngine::checkSat()
 
 Result SolverEngine::checkSat(const Node& assumption)
 {
+  ensureWellFormedTerm(assumption, "checkSat");
   std::vector<Node> assump;
   if (!assumption.isNull())
   {
@@ -750,11 +751,13 @@ Result SolverEngine::checkSat(const Node& assumption)
 
 Result SolverEngine::checkSat(const std::vector<Node>& assumptions)
 {
+  ensureWellFormedTerms(assumptions, "checkSat");
   return checkSatInternal(assumptions, false);
 }
 
 Result SolverEngine::checkEntailed(const Node& node)
 {
+  ensureWellFormedTerm(node, "checkEntailed");
   return checkSatInternal(
              node.isNull() ? std::vector<Node>() : std::vector<Node>{node},
              true)
@@ -763,6 +766,7 @@ Result SolverEngine::checkEntailed(const Node& node)
 
 Result SolverEngine::checkEntailed(const std::vector<Node>& nodes)
 {
+  ensureWellFormedTerms(nodes, "checkEntailed");
   return checkSatInternal(nodes, true).asEntailmentResult();
 }
 
@@ -853,7 +857,12 @@ Result SolverEngine::assertFormula(const Node& formula)
   SolverEngineScope smts(this);
   finishInit();
   d_state->doPendingPops();
+  ensureWellFormedTerm(formula, "assertFormula");
+  return assertFormulaInternal(formula);
+}
 
+Result SolverEngine::assertFormulaInternal(const Node& formula)
+{
   // as an optimization we do not check whether formula is well-formed here, and
   // defer this check for certain cases within the assertions module.
   Trace("smt") << "SolverEngine::assertFormula(" << formula << ")" << endl;
@@ -863,7 +872,7 @@ Result SolverEngine::assertFormula(const Node& formula)
 
   d_asserts->assertFormula(n);
   return quickCheck().asEntailmentResult();
-} /* SolverEngine::assertFormula() */
+}
 
 /*
    --------------------------------------------------------------------------
@@ -1122,7 +1131,7 @@ Result SolverEngine::blockModel(api::BlockModelsMode mode)
   ModelBlocker mb(*d_env.get());
   Node eblocker = mb.getModelBlocker(eassertsProc, m, mode);
   Trace("smt") << "Block formula: " << eblocker << std::endl;
-  return assertFormula(eblocker);
+  return assertFormulaInternal(eblocker);
 }
 
 Result SolverEngine::blockModelValues(const std::vector<Node>& exprs)
@@ -1143,9 +1152,9 @@ Result SolverEngine::blockModelValues(const std::vector<Node>& exprs)
   std::vector<Node> eassertsProc = getExpandedAssertions();
   // we always do block model values mode here
   ModelBlocker mb(*d_env.get());
-  Node eblocker =
-      mb.getModelBlocker(eassertsProc, m, api::BlockModelsMode::VALUES, exprs);
-  return assertFormula(eblocker);
+  Node eblocker = mb.getModelBlocker(
+      eassertsProc, m, api::BlockModelsMode::VALUES, exprs);
+  return assertFormulaInternal(eblocker);
 }
 
 std::pair<Node, Node> SolverEngine::getSepHeapAndNilExpr(void)
@@ -1187,14 +1196,29 @@ const Options& SolverEngine::options() const { return d_env->getOptions(); }
 void SolverEngine::ensureWellFormedTerm(const Node& n,
                                         const std::string& src) const
 {
-  bool wasShadow = false;
-  if (expr::hasFreeOrShadowedVar(n, wasShadow))
+  if (Configuration::isAssertionBuild())
   {
-    std::string varType(wasShadow ? "shadowed" : "free");
-    std::stringstream se;
-    se << "Cannot process term with " << varType << " variable in " << src
-       << ".";
-    throw ModalException(se.str().c_str());
+    bool wasShadow = false;
+    if (expr::hasFreeOrShadowedVar(n, wasShadow))
+    {
+      std::string varType(wasShadow ? "shadowed" : "free");
+      std::stringstream se;
+      se << "Cannot process term with " << varType << " variable in " << src
+         << ".";
+      throw ModalException(se.str().c_str());
+    }
+  }
+}
+
+void SolverEngine::ensureWellFormedTerms(const std::vector<Node>& ns,
+                                         const std::string& src) const
+{
+  if (Configuration::isAssertionBuild())
+  {
+    for (const Node& n : ns)
+    {
+      ensureWellFormedTerm(n, src);
+    }
   }
 }
 
