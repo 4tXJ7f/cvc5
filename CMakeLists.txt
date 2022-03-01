@@ -15,6 +15,8 @@
 
 cmake_minimum_required(VERSION 3.9)
 
+set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+
 #-----------------------------------------------------------------------------#
 # Project configuration
 
