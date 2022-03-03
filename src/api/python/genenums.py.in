@@ -13,22 +13,20 @@
 ##
 
 """
-This script reads cvc5/src/api/cpp/cvc5_kind.h and generates
-.pxd and .pxi files which declare all the cvc5 kinds and
-implement a Python wrapper for kinds, respectively. The
-default names are kinds.pxd / kinds.pxi, but the name is
-configurable from the command line with --kinds-file-prefix.
+This script reads a file that defines enums and generates .pxd and .pxi files
+which declare all the enum values and implement a Python wrapper for values,
+respectively. The default names are kinds.pxd / kinds.pxi, but the name is
+configurable from the command line with --enums-file-prefix.
 
-The script is aware of the '#if 0' pattern and will ignore
-kinds declared between '#if 0' and '#endif'. It can also
-handle nested '#if 0' pairs.
+The script is aware of the '#if 0' pattern and will ignore values declared
+between '#if 0' and '#endif'. It can also handle nested '#if 0' pairs.
 """
 
 import argparse
 import os
 import sys
 
-# get access to cvc5/src/api/parsekinds.py
+# get access to cvc5/src/api/parseenums.py
 SOURCE_DIR='${CMAKE_SOURCE_DIR}/src'
 sys.path.insert(0, os.path.abspath(f'{SOURCE_DIR}/api'))
 
@@ -42,11 +40,7 @@ PYCOMMENT           = '#'
 
 ENUMS_PXD_TOP_TEMPLATE = \
 r"""cdef extern from "{header}" namespace "cvc5::api":
-    enum {enum}:
-"""
-
-ENUMS_CLASS_VALUE_TEMPLATE = \
-r"""       {value} 'cvc5::api::{enum}::{value}',
+    cdef enum {enum}:
 """
 
 ENUMS_PXI_TOP = \
@@ -80,10 +74,7 @@ def gen_pxd(parser: EnumParser, file_prefix, header):
                 f.write(NL)
             f.write(ENUMS_PXD_TOP_TEMPLATE.format(header=header[len(SOURCE_DIR) + 1:], enum=enum.name))
             for value in enum.values:
-                if enum.is_class:
-                    f.write(ENUMS_CLASS_VALUE_TEMPLATE.format(value=value, enum=enum.name))
-                else:
-                    f.write("       {},\n".format(value))
+                f.write("       {},\n".format(value))
 
 def gen_pxi(parser : EnumParser, file_prefix):
     basename = file_prefix[file_prefix.rfind("/") + 1:]
@@ -95,21 +86,21 @@ def gen_pxi(parser : EnumParser, file_prefix):
                 f.write(ENUMS_ATTR_TEMPLATE.format(name=name, enum=enum.name, value=value, doc=doc))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser('Read a kinds header file and generate a '
-                         'corresponding pxd file, with simplified kind names.')
-    parser.add_argument('--kinds-header', metavar='<KINDS_HEADER>',
-                        help='The header file to read kinds from')
-    parser.add_argument('--kinds-file-prefix', metavar='<KIND_FILE_PREFIX>',
+    parser = argparse.ArgumentParser('Read a header with enums and generate a '
+                         'corresponding pxd file, with simplified enum names.')
+    parser.add_argument('--enums-header', metavar='<ENUMS_HEADER>',
+                        help='The header file to read enums from')
+    parser.add_argument('--enums-file-prefix', metavar='<ENUMS_FILE_PREFIX>',
                         help='The prefix for the .pxd and .pxi files to write '
                         'the Cython declarations to.',
                         default=DEFAULT_PREFIX)
 
     args               = parser.parse_args()
-    kinds_header       = args.kinds_header
-    kinds_file_prefix  = args.kinds_file_prefix
+    enums_header       = args.enums_header
+    enums_file_prefix  = args.enums_file_prefix
 
     kp = EnumParser()
-    kp.parse(kinds_header)
+    kp.parse(enums_header)
 
-    gen_pxd(kp, kinds_file_prefix, kinds_header)
-    gen_pxi(kp, kinds_file_prefix)
+    gen_pxd(kp, enums_file_prefix, enums_header)
+    gen_pxi(kp, enums_file_prefix)

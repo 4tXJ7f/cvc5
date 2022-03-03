@@ -20,7 +20,7 @@
 
 namespace cvc5::api {
 
-enum class BlockModelsMode
+enum BlockModelsMode
 {
   /** Block models based on the SAT skeleton. */
   LITERALS,

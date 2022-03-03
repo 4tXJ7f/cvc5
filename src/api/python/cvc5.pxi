@@ -37,6 +37,7 @@ from cvc5 cimport wstring as c_wstring
 from cvc5 cimport tuple as c_tuple
 from cvc5 cimport get0, get1, get2
 from cvc5kinds cimport Kind as c_Kind
+from cvc5types cimport BlockModelsMode as c_BlockModelsMode
 
 cdef extern from "Python.h":
     wchar_t* PyUnicode_AsWideCharString(object, Py_ssize_t *)
@@ -2315,7 +2316,7 @@ cdef class Solver:
         result = self.csolver.getAbductNext(output.cterm)
         return result
 
-    def blockModel(self):
+    def blockModel(self, mode):
         """
         Block the current model. Can be called only if immediately preceded by a
         SAT or INVALID query.
@@ -2332,7 +2333,7 @@ cdef class Solver:
         :ref:`block-models <lbl-option-block-models>`
         to a mode other than ``none``.
         """
-        self.csolver.blockModel()
+        self.csolver.blockModel(<c_BlockModelsMode> mode.value)
 
     def blockModelValues(self, terms):
         """
