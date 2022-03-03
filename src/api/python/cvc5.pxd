@@ -7,6 +7,7 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 from cvc5kinds cimport Kind
+from cvc5types cimport BlockModelsMode
 
 
 cdef extern from "<iostream>" namespace "std":
@@ -299,7 +300,7 @@ cdef extern from "api/cpp/cvc5.h" namespace "cvc5::api":
         bint getAbduct(const Term& conj, Term& output) except +
         bint getAbduct(const Term& conj, Grammar& grammar, Term& output) except +
         bint getAbductNext(const Term& conj) except +
-        void blockModel() except +
+        void blockModel(BlockModelsMode mode) except +
         void blockModelValues(const vector[Term]& terms) except +
 
     cdef cppclass Grammar:

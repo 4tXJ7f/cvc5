@@ -48,8 +48,9 @@ find_package(Cython 0.29 REQUIRED)
 
 set(CYTHON_FLAGS "-X embedsignature=True")
 
+configure_file(genenums.py.in genenums.py)
+
 # Generate cvc5kinds.{pxd,pyx}
-configure_file(genkinds.py.in genkinds.py)
 set(GENERATED_KINDS_FILES
   "${CMAKE_CURRENT_BINARY_DIR}/cvc5kinds.pxd"
   "${CMAKE_CURRENT_BINARY_DIR}/cvc5kinds.pxi"
@@ -59,11 +60,11 @@ add_custom_command(
     ${GENERATED_KINDS_FILES}
   COMMAND
     "${PYTHON_EXECUTABLE}"
-    "${CMAKE_CURRENT_BINARY_DIR}/genkinds.py"
-    --kinds-header "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_kind.h"
-    --kinds-file-prefix "${CMAKE_CURRENT_BINARY_DIR}/cvc5kinds"
+    "${CMAKE_CURRENT_BINARY_DIR}/genenums.py"
+    --enums-header "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_kind.h"
+    --enums-file-prefix "${CMAKE_CURRENT_BINARY_DIR}/cvc5kinds"
   DEPENDS
-    "${CMAKE_CURRENT_BINARY_DIR}/genkinds.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/genenums.py"
     "${PROJECT_SOURCE_DIR}/src/api/parseenums.py"
     "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_kind.h"
 )
@@ -78,11 +79,11 @@ add_custom_command(
     ${GENERATED_TYPES_FILES}
   COMMAND
     "${PYTHON_EXECUTABLE}"
-    "${CMAKE_CURRENT_BINARY_DIR}/genkinds.py"
-    --kinds-header "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_types.h"
-    --kinds-file-prefix "${CMAKE_CURRENT_BINARY_DIR}/cvc5types"
+    "${CMAKE_CURRENT_BINARY_DIR}/genenums.py"
+    --enums-header "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_types.h"
+    --enums-file-prefix "${CMAKE_CURRENT_BINARY_DIR}/cvc5types"
   DEPENDS
-    "${CMAKE_CURRENT_BINARY_DIR}/genkinds.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/genenums.py"
     "${PROJECT_SOURCE_DIR}/src/api/parseenums.py"
     "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_types.h"
 )

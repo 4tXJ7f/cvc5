@@ -13,12 +13,11 @@
 ##
 
 """
-This script implements EnumParser which
-parses the header file cvc5/src/api/cpp/cvc5_kind.h
+This script implements EnumParser which parses a header file that defines
+enums.
 
-The script is aware of the '#if 0' pattern and will ignore
-kinds declared between '#if 0' and '#endif'. It can also
-handle nested '#if 0' pairs.
+The script is aware of the '#if 0' pattern and will ignore enum values declared
+between '#if 0' and '#endif'. It can also handle nested '#if 0' pairs.
 """
 
 from collections import OrderedDict
@@ -55,11 +54,9 @@ replacements = {
 
 
 class CppEnum:
-    def __init__(self, name, is_class):
+    def __init__(self, name):
         # The name of the enum
         self.name = name
-        # True if the enum was defined as `enum class Foo`, false if it was defined as `enum Foo`
-        self.is_class = is_class
         # dictionary from C++ value name to shortened name
         self.values = OrderedDict()
         # dictionary from shortened name to documentation comment
@@ -79,12 +76,15 @@ class EnumParser:
         self.endtoken = None
         # stack of end tokens
         self.endtoken_stack = []
-        # boolean that is true when in the kinds enum
+        # boolean that is true when in an enum
         self.in_enum = False
-        # latest block comment - used for kinds documentation
+        # latest block comment - used for enums documentation
         self.latest_block_comment = ""
 
     def get_current_enum(self):
+        '''
+        Returns the enum that is currently being parsed
+        '''
         return self.enums[-1]
 
     def get_comment(self, value_name):
@@ -96,7 +96,7 @@ class EnumParser:
         try:
             return enum.values_doc[value_name]
         except KeyError:
-            return enum.values_doc[enum.kinds[value_name]]
+            return enum.values_doc[enum.values[value_name]]
 
     def format_name(self, name):
         '''
@@ -214,9 +214,8 @@ class EnumParser:
                 # Parse the enum name for enums of the form `enum Foo` as well
                 # as `enum class Foo`
                 tokens = line.split(" ")
-                is_class = tokens[1] == "class"
-                name = tokens[2] if is_class else tokens[1]
-                self.enums.append(CppEnum(name, is_class))
+                name = tokens[1]
+                self.enums.append(CppEnum(name))
                 continue
         f.close()
 
