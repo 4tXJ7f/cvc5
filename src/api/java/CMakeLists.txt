@@ -19,7 +19,7 @@ set(JNI_DIR "${CMAKE_CURRENT_BINARY_DIR}/jni")
 file(MAKE_DIRECTORY ${JNI_DIR})
 
 # Generate Kind.java
-configure_file(genkinds.py.in genkinds.py)
+configure_file(genenums.py.in genenums.py)
 
 set(JAVA_KIND_FILE
   "${CMAKE_CURRENT_BINARY_DIR}/io/github/cvc5/api/Kind.java"
@@ -30,11 +30,11 @@ add_custom_command(
     ${JAVA_KIND_FILE}
   COMMAND
     "${PYTHON_EXECUTABLE}"
-    "${CMAKE_CURRENT_BINARY_DIR}/genkinds.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/genenums.py"
     --kinds-header "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_kind.h"
     --kinds-file-prefix "${CMAKE_CURRENT_BINARY_DIR}/io/github/cvc5/api/Kind"
   DEPENDS
-    "${CMAKE_CURRENT_BINARY_DIR}/genkinds.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/genenums.py"
     "${PROJECT_SOURCE_DIR}/src/api/cpp/cvc5_kind.h"
 )
 
