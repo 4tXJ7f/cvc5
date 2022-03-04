@@ -24,15 +24,16 @@ import re
 import textwrap
 
 
-# get access to cvc5/src/api/parsekinds.py
-sys.path.insert(0, os.path.abspath('${CMAKE_SOURCE_DIR}/src/api'))
+# get access to cvc5/src/api/parseenums.py
+SOURCE_DIR='${CMAKE_SOURCE_DIR}/src'
+sys.path.insert(0, os.path.abspath(f'{SOURCE_DIR}/api'))
 
 from parseenums import *
 
-# Default Filenames
+#################### Default Filenames ################
 DEFAULT_PREFIX = 'Kind'
 
-# Code Blocks
+################ Comments and Macro Tokens ############
 
 KINDS_JAVA_TOP = \
     r"""package io.github.cvc5.api;
