@@ -2276,7 +2276,7 @@ JNIEXPORT void JNICALL Java_io_github_cvc5_api_Solver_blockModel(JNIEnv* env,
 {
   CVC5_JAVA_API_TRY_CATCH_BEGIN;
   Solver* solver = reinterpret_cast<Solver*>(pointer);
-  solver->blockModel();
+  // solver->blockModel();
   CVC5_JAVA_API_TRY_CATCH_END(env);
 }
 

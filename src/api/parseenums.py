@@ -11,7 +11,6 @@
 # directory for licensing information.
 # #############################################################################
 ##
-
 """
 This script implements EnumParser which parses a header file that defines
 enums.
@@ -47,20 +46,18 @@ MACRO_BLOCK_END = '#endif'
 # special cases for format_name
 _IS = '_IS'
 # replacements after some preprocessing
-replacements = {
-    'Bitvector': 'BV',
-    'Floatingpoint': 'FP'
-}
+replacements = {'Bitvector': 'BV', 'Floatingpoint': 'FP'}
 
 
 class CppEnum:
+
     def __init__(self, name):
         # The name of the enum
         self.name = name
         # dictionary from C++ value name to shortened name
-        self.values = OrderedDict()
+        self.enumerators = OrderedDict()
         # dictionary from shortened name to documentation comment
-        self.values_doc = OrderedDict()
+        self.enumerators_doc = OrderedDict()
 
 
 class EnumParser:
@@ -80,6 +77,8 @@ class EnumParser:
         self.in_enum = False
         # latest block comment - used for enums documentation
         self.latest_block_comment = ""
+        # The value of the last enumerator
+        self.last_value = -1
 
     def get_current_enum(self):
         '''
@@ -87,16 +86,16 @@ class EnumParser:
         '''
         return self.enums[-1]
 
-    def get_comment(self, value_name):
+    def get_comment(self, enumerator_name):
         '''
         Look up a documentation comment for a value by name
         Accepts both full C++ name and shortened name
         '''
         enum = self.get_current_enum()
         try:
-            return enum.values_doc[value_name]
+            return enum.enumerators_doc[enumerator_name]
         except KeyError:
-            return enum.values_doc[enum.values[value_name]]
+            return enum.enumerators_doc[enum.enumerators[enumerator_name]]
 
     def format_name(self, name):
         '''
@@ -139,10 +138,10 @@ class EnumParser:
             "Expecting to start with /* but got \"{}\"".format(comment[:2])
         assert comment[-2:] == '*/', \
             "Expecting to end with */ but got \"{}\"".format(comment[-2:])
-        comment = comment[2:-2].strip('*\n')   # /** ... */ -> ...
-        comment = textwrap.dedent(comment)     # remove indentation
-        comment = comment.replace('\n*', '\n') # remove leading "*""
-        comment = textwrap.dedent(comment)     # remove indentation
+        comment = comment[2:-2].strip('*\n')  # /** ... */ -> ...
+        comment = textwrap.dedent(comment)  # remove indentation
+        comment = comment.replace('\n*', '\n')  # remove leading "*""
+        comment = textwrap.dedent(comment)  # remove indentation
         comment = comment.replace('\\rst', '').replace('\\endrst', '')
         comment = comment.strip()  # remove leading and trailing spaces
         return comment
@@ -200,15 +199,29 @@ class EnumParser:
             elif self.in_enum:
                 if line == OCB:
                     continue
+                name = None
+                value = None
                 if EQ in line:
-                    line = line[:line.find(EQ)].strip()
+                    (name, remainder) = line.split(EQ)
+                    name = name.strip()
+                    if C in remainder:
+                        value = int(remainder[:remainder.find(C)].strip())
+                    else:
+                        value = int(remainder)
                 elif C in line:
-                    line = line[:line.find(C)].strip()
-                fmt_name = self.format_name(line)
+                    name = line[:line.find(C)].strip()
+                else:
+                    name = line
+
+                if not value:
+                    value = self.last_value + 1
+                self.last_value = value
+
+                fmt_name = self.format_name(name)
                 enum = self.get_current_enum()
-                enum.values[line] = fmt_name
+                enum.enumerators[name] = (fmt_name, value)
                 fmt_comment = self.format_comment(self.latest_block_comment)
-                enum.values_doc[fmt_name] = fmt_comment
+                enum.enumerators_doc[fmt_name] = fmt_comment
             elif ENUM_START in line:
                 self.in_enum = True
                 # Parse the enum name for enums of the form `enum Foo` as well
@@ -218,4 +231,3 @@ class EnumParser:
                 self.enums.append(CppEnum(name))
                 continue
         f.close()
-

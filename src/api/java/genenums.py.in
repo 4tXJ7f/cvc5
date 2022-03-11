@@ -24,27 +24,28 @@ import re
 import textwrap
 
 
-# get access to cvc5/src/api/parsekinds.py
-sys.path.insert(0, os.path.abspath('${CMAKE_SOURCE_DIR}/src/api'))
+# get access to cvc5/src/api/parseenums.py
+SOURCE_DIR='${CMAKE_SOURCE_DIR}/src'
+sys.path.insert(0, os.path.abspath(f'{SOURCE_DIR}/api'))
 
 from parseenums import *
 
-# Default Filenames
+#################### Default Filenames ################
 DEFAULT_PREFIX = 'Kind'
 
 # Code Blocks
 
-KINDS_JAVA_TOP = \
+ENUM_JAVA_TOP = \
     r"""package io.github.cvc5.api;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum Kind
-{
+public enum {name}
+{{
 """
 
-KINDS_JAVA_BOTTOM = \
+ENUM_JAVA_BOTTOM = \
     r""";
 
   /* the int value of the kind */
@@ -114,18 +115,17 @@ def format_comment(comment):
 
 
 # Files generation
-def gen_java(parser: KindsParser, filename):
-    f = open(filename, "w")
-    code = KINDS_JAVA_TOP
-    enum_value = -2  # initial enum value
-    for kind, name in parser.kinds.items():
-        comment = parser.get_comment(kind)
-        comment = format_comment(comment)
-        code += "{comment}\n  {name}({enum_value}),\n".format(comment=comment, name=kind, enum_value=enum_value)
-        enum_value = enum_value + 1
-    code += KINDS_JAVA_BOTTOM
-    f.write(code)
-    f.close()
+def gen_java(parser: EnumParser, path):
+    for enum in parser.enums:
+        filename = os.path.join(path, enum.name + ".java")
+        with open(filename, "w") as f:
+            code = ENUM_JAVA_TOP.format(name=enum.name)
+            for name, (fmt_name, value) in enum.enumerators.items():
+                comment = parser.get_comment(fmt_name)
+                comment = format_comment(comment)
+                code += "{comment}\n  {name}({enum_value}),\n".format(comment=comment, name=name, enum_value=value)
+            code += ENUM_JAVA_BOTTOM
+            f.write(code)
 
 
 if __name__ == "__main__":
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     kinds_header = args.kinds_header
     kinds_file_prefix = args.kinds_file_prefix
 
-    kp = KindsParser()
-    kp.parse(kinds_header)
+    ep = EnumParser()
+    ep.parse(kinds_header)
 
-    gen_java(kp, kinds_file_prefix + ".java")
+    gen_java(ep, kinds_file_prefix)
