@@ -27,6 +27,15 @@ jobs:
             exclude_regress: 3-4
             run_regression_args: --tester base --tester model --tester synth --tester abduct --tester dump
 
+          - name: win64:production
+            os: ubuntu-latest
+            config: production --auto-download --win64
+            cache-key: productionwin64
+            store-to-release: true
+            binary-ext: .exe
+            exclude_regress: 3-4
+            run_regression_args: --tester base --tester model --tester synth --tester abduct --tester dump
+
           - name: ubuntu:production-clang
             os: ubuntu-18.04
             env: CC=clang CXX=clang++
@@ -50,14 +59,6 @@ jobs:
             cache-key: dbgclang
             exclude_regress: 3-4
             run_regression_args: --tester base --tester model --tester synth --tester abduct --tester unsat-core --tester dump
-
-          - name: win64:production
-            os: ubuntu-latest
-            config: production --auto-download --win64
-            cache-key: productionwin64
-            store-to-release: true
-            exclude_regress: 3-4
-            run_regression_args: --tester base --tester model --tester synth --tester abduct --tester dump
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -119,6 +120,7 @@ jobs:
       uses: ./.github/actions/add-to-release
       with:
         binary: ${{ steps.configure-and-build.outputs.static-build-dir }}/bin/cvc5
+        binary-ext: ${{ matrix.binary-ext }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
 
