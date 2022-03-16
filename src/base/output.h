@@ -54,9 +54,9 @@ class null_streambuf : public std::streambuf
 /** A null stream-buffer singleton */
 extern null_streambuf null_sb;
 /** A null output stream singleton */
-extern std::ostream null_os CVC5_EXPORT;
+extern std::ostream null_os;
 
-class CVC5_EXPORT Cvc5ostream
+class Cvc5ostream
 {
   static const std::string s_tab;
   static const int s_indentIosIndex;
@@ -107,7 +107,20 @@ class CVC5_EXPORT Cvc5ostream
   std::ostream* getStreamPointer() const { return d_os; }
 
   template <class T>
-  Cvc5ostream& operator<<(T const& t) CVC5_EXPORT;
+  Cvc5ostream& operator<<(T const& t)
+{
+  if(d_os != NULL) {
+    if(d_firstColumn) {
+      d_firstColumn = false;
+      long indent = d_os->iword(s_indentIosIndex);
+      for(long i = 0; i < indent; ++i) {
+        d_os = &(*d_os << s_tab);
+      }
+    }
+    d_os = &(*d_os << t);
+  }
+  return *this;
+}
 
   // support manipulators, endl, etc..
   Cvc5ostream& operator<<(std::ostream& (*pf)(std::ostream&))
@@ -153,22 +166,6 @@ inline Cvc5ostream& pop(Cvc5ostream& stream)
   return stream;
 }
 
-template <class T>
-Cvc5ostream& Cvc5ostream::operator<<(T const& t)
-{
-  if(d_os != NULL) {
-    if(d_firstColumn) {
-      d_firstColumn = false;
-      long indent = d_os->iword(s_indentIosIndex);
-      for(long i = 0; i < indent; ++i) {
-        d_os = &(*d_os << s_tab);
-      }
-    }
-    d_os = &(*d_os << t);
-  }
-  return *this;
-}
-
 /**
  * Does nothing; designed for compilation of non-debug/non-trace
  * builds.  None of these should ever be called in such builds, but we
@@ -182,7 +179,7 @@ class NullC
   operator std::ostream&() const { return null_os; }
 }; /* class NullC */
 
-extern NullC nullStream CVC5_EXPORT;
+extern NullC nullStream;
 
 /** The debug output class */
 class DebugC
@@ -301,11 +298,11 @@ public:
 }; /* class TraceC */
 
 /** The debug output singleton */
-extern DebugC DebugChannel CVC5_EXPORT;
+extern DebugC DebugChannel;
 /** The warning output singleton */
-extern WarningC WarningChannel CVC5_EXPORT;
+extern WarningC WarningChannel;
 /** The trace output singleton */
-extern TraceC TraceChannel CVC5_EXPORT;
+extern TraceC TraceChannel;
 
 #ifdef CVC5_MUZZLE
 
