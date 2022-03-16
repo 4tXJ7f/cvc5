@@ -58,8 +58,8 @@ extern std::ostream null_os;
 
 class Cvc5ostream
 {
-  static const std::string s_tab;
-  static const int s_indentIosIndex;
+  static const std::string s_tab CVC5_EXPORT;
+  static const int s_indentIosIndex CVC5_EXPORT;
 
   /** The underlying ostream */
   std::ostream* d_os;
@@ -179,7 +179,7 @@ class NullC
   operator std::ostream&() const { return null_os; }
 }; /* class NullC */
 
-extern NullC nullStream;
+extern NullC nullStream CVC5_EXPORT;
 
 /** The debug output class */
 class DebugC
@@ -298,11 +298,11 @@ public:
 }; /* class TraceC */
 
 /** The debug output singleton */
-extern DebugC DebugChannel;
+extern DebugC DebugChannel CVC5_EXPORT;
 /** The warning output singleton */
-extern WarningC WarningChannel;
+extern WarningC WarningChannel CVC5_EXPORT;
 /** The trace output singleton */
-extern TraceC TraceChannel;
+extern TraceC TraceChannel CVC5_EXPORT;
 
 #ifdef CVC5_MUZZLE
 
