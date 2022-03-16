@@ -28,8 +28,7 @@ runs:
           flex \
           libfl-dev \
           flexc++ \
-          mingw-w64 \
-          wine
+          mingw-w64
         python3 -m pip install pexpect setuptools toml
         cd /usr/src/googletest
         sudo cmake .
