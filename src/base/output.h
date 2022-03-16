@@ -30,10 +30,6 @@
 namespace cvc5 {
 
 template <class T, class U>
-std::ostream& operator<<(std::ostream& out,
-                         const std::pair<T, U>& p) CVC5_EXPORT;
-
-template <class T, class U>
 std::ostream& operator<<(std::ostream& out, const std::pair<T, U>& p) {
   return out << "[" << p.first << "," << p.second << "]";
 }
