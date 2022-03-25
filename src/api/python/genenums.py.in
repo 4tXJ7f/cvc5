@@ -70,27 +70,27 @@ replacements = {'Bitvector': 'BV', 'Floatingpoint': 'FP'}
 
 
 def format_name(name):
-    '''                                                                                     
+    '''
     In the Python API, each Kind name is reformatted for easier use
-                                                                                            
-    The naming scheme is:                                                                   
+
+    The naming scheme is:
        1. capitalize the first letter of each word (delimited by underscores)
        2. make the rest of the letters lowercase
-       3. replace Floatingpoint with FP                                                     
-       4. replace Bitvector with BV                                                         
-                                                                                            
-    There is one exception:                                                                 
-       FLOATINGPOINT_IS_NAN  --> FPIsNan                                                    
-                                                                                            
+       3. replace Floatingpoint with FP
+       4. replace Bitvector with BV
+
+    There is one exception:
+       FLOATINGPOINT_IS_NAN  --> FPIsNan
+
     For every "_IS" in the name, there's an underscore added before step 1,
        so that the word after "Is" is capitalized
-                                                                                            
-    Examples:                                                                               
-       BITVECTOR_ADD       -->  BVAdd                                                       
-       APPLY_SELECTOR      -->  ApplySelector                                               
-       FLOATINGPOINT_IS_NAN -->  FPIsNan                                                    
-       SET_MINUS            -->  Setminus                                                   
-                                                                                            
+
+    Examples:
+       BITVECTOR_ADD       -->  BVAdd
+       APPLY_SELECTOR      -->  ApplySelector
+       FLOATINGPOINT_IS_NAN -->  FPIsNan
+       SET_MINUS            -->  Setminus
+
     See the generated .pxi file for an explicit mapping
     '''
     name = name.replace(_IS, _IS + US)
