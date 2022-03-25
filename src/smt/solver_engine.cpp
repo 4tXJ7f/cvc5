@@ -1123,13 +1123,8 @@ void SolverEngine::blockModelValues(const std::vector<Node>& exprs)
   // we always do block model values mode here
   ModelBlocker mb(*d_env.get());
   Node eblocker = mb.getModelBlocker(
-<<<<<<< HEAD
       eassertsProc, m, api::BlockModelsMode::VALUES, exprs);
-  return assertFormulaInternal(eblocker);
-=======
-      eassertsProc, m, options::BlockModelsMode::VALUES, exprs);
   assertFormulaInternal(eblocker);
->>>>>>> master
 }
 
 std::pair<Node, Node> SolverEngine::getSepHeapAndNilExpr(void)
