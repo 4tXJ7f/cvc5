@@ -942,7 +942,7 @@ class CVC5_EXPORT GetModelCommand : public Command
 class CVC5_EXPORT BlockModelCommand : public Command
 {
  public:
-  BlockModelCommand(api::BlockModelsMode mode);
+  BlockModelCommand(modes::BlockModelsMode mode);
 
   void invoke(api::Solver* solver, SymbolManager* sm) override;
   Command* clone() const override;
@@ -953,7 +953,7 @@ class CVC5_EXPORT BlockModelCommand : public Command
                 Language language = Language::LANG_AUTO) const override;
 
  private:
-  api::BlockModelsMode d_mode;
+  modes::BlockModelsMode d_mode;
 }; /* class BlockModelCommand */
 
 /** The command to block model values. */

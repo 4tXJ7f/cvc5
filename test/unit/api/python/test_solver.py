@@ -2453,6 +2453,7 @@ def test_issue7000(solver):
 
 
 def test_mk_sygus_var(solver):
+    solver.setOption("sygus", "true")
     boolSort = solver.getBooleanSort()
     intSort = solver.getIntegerSort()
     funSort = solver.mkFunctionSort(intSort, boolSort)
@@ -2500,7 +2501,7 @@ def test_synth_fun(solver):
     with pytest.raises(RuntimeError):
         solver.synthFun("f6", [x], boolean, g2)
     slv = cvc5.Solver()
-    solver.setOption("sygus", "true")
+    slv.setOption("sygus", "true")
     x2 = slv.mkVar(slv.getBooleanSort())
     slv.synthFun("f1", [x2], slv.getBooleanSort())
     with pytest.raises(RuntimeError):

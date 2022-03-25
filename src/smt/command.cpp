@@ -1692,7 +1692,7 @@ void GetModelCommand::toStream(std::ostream& out,
 /* class BlockModelCommand */
 /* -------------------------------------------------------------------------- */
 
-BlockModelCommand::BlockModelCommand(api::BlockModelsMode mode) : d_mode(mode)
+BlockModelCommand::BlockModelCommand(modes::BlockModelsMode mode) : d_mode(mode)
 {
 }
 

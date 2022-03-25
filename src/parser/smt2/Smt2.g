@@ -1050,7 +1050,7 @@ extendedCommand[std::unique_ptr<cvc5::Command>* cmd]
     }
   | BLOCK_MODEL_TOK KEYWORD { PARSER_STATE->checkThatLogicIsSet(); }
     {
-      api::BlockModelsMode mode =
+      modes::BlockModelsMode mode =
         PARSER_STATE->getBlockModelsMode(
           AntlrInput::tokenText($KEYWORD).c_str() + 1);
       cmd->reset(new BlockModelCommand(mode));

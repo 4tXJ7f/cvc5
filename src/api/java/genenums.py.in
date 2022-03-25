@@ -114,16 +114,17 @@ def format_comment(comment):
 
 # Files generation
 def gen_java(parser: EnumParser, path):
-    for enum in parser.enums:
-        filename = os.path.join(path, enum.name + ".java")
-        with open(filename, "w") as f:
-            code = ENUM_JAVA_TOP.format(name=enum.name)
-            for name, value in enum.enumerators.items():
-                comment = enum.enumerators_doc.get(name, '')
-                comment = format_comment(comment)
-                code += "{comment}\n  {name}({enum_value}),\n".format(comment=comment, name=name, enum_value=value)
-            code += ENUM_JAVA_BOTTOM
-            f.write(code)
+    for namespace in parser.namespaces:
+        for enum in namespace.enums:
+            filename = os.path.join(path, enum.name + ".java")
+            with open(filename, "w") as f:
+                code = ENUM_JAVA_TOP.format(name=enum.name)
+                for name, value in enum.enumerators.items():
+                    comment = enum.enumerators_doc.get(name, '')
+                    comment = format_comment(comment)
+                    code += "{comment}\n  {name}({enum_value}),\n".format(comment=comment, name=name, enum_value=value)
+                code += ENUM_JAVA_BOTTOM
+                f.write(code)
 
 
 if __name__ == "__main__":

@@ -69,7 +69,7 @@ class ModelBlocker : protected EnvObj
   Node getModelBlocker(
       const std::vector<Node>& assertions,
       theory::TheoryModel* m,
-      api::BlockModelsMode mode,
+      modes::BlockModelsMode mode,
       const std::vector<Node>& exprToBlock = std::vector<Node>());
 }; /* class TheoryModelCoreBuilder */
 

@@ -4469,7 +4469,7 @@ class CVC5_EXPORT Solver
    * to a mode other than ``none``.
    * \endverbatim
    */
-  void blockModel(BlockModelsMode mode) const;
+  void blockModel(modes::BlockModelsMode mode) const;
 
   /**
    * Block the current model values of (at least) the values in terms. Can be

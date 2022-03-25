@@ -231,7 +231,7 @@ class CVC5_EXPORT SolverEngine
    * This adds an assertion to the assertion stack that blocks the current
    * model based on the current options configured by cvc5.
    */
-  void blockModel(api::BlockModelsMode mode);
+  void blockModel(modes::BlockModelsMode mode);
   /**
    * Block the current model values of (at least) the values in exprs.
    * Can be called only if immediately preceded by a SAT or NOT_ENTAILED query.

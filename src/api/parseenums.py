@@ -31,6 +31,8 @@ C = ','
 US = '_'
 NL = '\n'
 
+NAMESPACE_START = 'namespace'
+
 # Expected C++ Enum Declarations
 ENUM_START = 'enum'
 ENUM_END = CCB + SC
@@ -41,6 +43,14 @@ BLOCK_COMMENT_BEGIN = '/*'
 BLOCK_COMMENT_END = '*/'
 MACRO_BLOCK_BEGIN = '#if 0'
 MACRO_BLOCK_END = '#endif'
+
+class CppNamespace:
+
+    def __init__(self, name):
+        # The name of the namespace
+        self.name = name
+        # The enums in this namespace
+        self.enums = []
 
 class CppEnum:
 
@@ -60,7 +70,8 @@ class EnumParser:
     }
 
     def __init__(self):
-        self.enums = []
+        # the namespaces that have been parsed
+        self.namespaces = []
         # the end token for the current type of block
         # none if not in a block comment or macro
         self.endtoken = None
@@ -73,11 +84,17 @@ class EnumParser:
         # The value of the last enumerator
         self.last_value = -1
 
+    def get_current_namespace(self):
+        '''
+        Returns the namespace that is currently being parsed
+        '''
+        return self.namespaces[-1]
+
     def get_current_enum(self):
         '''
         Returns the enum that is currently being parsed
         '''
-        return self.enums[-1]
+        return self.get_current_namespace().enums[-1]
 
     def format_comment(self, comment):
         '''
@@ -172,10 +189,12 @@ class EnumParser:
                 enum.enumerators_doc[name] = fmt_comment
             elif ENUM_START in line:
                 self.in_enum = True
-                # Parse the enum name for enums of the form `enum Foo` as well
-                # as `enum class Foo`
                 tokens = line.split(" ")
                 name = tokens[1]
-                self.enums.append(CppEnum(name))
+                self.get_current_namespace().enums.append(CppEnum(name))
                 continue
+            elif line.startswith(NAMESPACE_START):
+                tokens = line.split(" ")
+                name = tokens[1]
+                self.namespaces.append(CppNamespace(name))
         f.close()

@@ -40,7 +40,7 @@ DEFAULT_PREFIX = 'kinds'
 PYCOMMENT           = '#'
 
 ENUMS_PXD_TOP_TEMPLATE = \
-r"""cdef extern from "{header}" namespace "cvc5::api":
+r"""cdef extern from "{header}" namespace "{namespace}":
     cdef enum {enum}:
 """
 
@@ -115,26 +115,29 @@ def reformat_comment(comment):
 
 def gen_pxd(parser: EnumParser, file_prefix, header):
     with open(file_prefix + ".pxd", "w") as f:
-        for enum in parser.enums:
-            # include the format_name docstring in the generated file
-            # could be helpful for users to see the formatting rules
-            for line in format_name.__doc__.split(NL):
-                f.write(PYCOMMENT)
-                if not line.isspace():
-                    f.write(line)
-                f.write(NL)
-            f.write(ENUMS_PXD_TOP_TEMPLATE.format(header=header[len(SOURCE_DIR) + 1:], enum=enum.name))
-            for enumerator in enum.enumerators:
-                f.write("       {},\n".format(enumerator))
+        for namespace in parser.namespaces:
+            print(file_prefix)
+            for enum in namespace.enums:
+                # include the format_name docstring in the generated file
+                # could be helpful for users to see the formatting rules
+                for line in format_name.__doc__.split(NL):
+                    f.write(PYCOMMENT)
+                    if not line.isspace():
+                        f.write(line)
+                    f.write(NL)
+                f.write(ENUMS_PXD_TOP_TEMPLATE.format(header=header[len(SOURCE_DIR) + 1:], enum=enum.name, namespace=namespace.name))
+                for enumerator in enum.enumerators:
+                    f.write("       {},\n".format(enumerator))
 
 def gen_pxi(parser : EnumParser, file_prefix):
     basename = file_prefix[file_prefix.rfind("/") + 1:]
     with open(file_prefix + ".pxi", "w") as f:
-        for enum in parser.enums:
-            f.write(ENUMS_PXI_TOP.format(basename=basename, enum=enum.name))
-            for name, value in enum.enumerators.items():
-                doc = reformat_comment(enum.enumerators_doc.get(name, ''))
-                f.write(ENUMS_ATTR_TEMPLATE.format(name=format_name(name), enum=enum.name, cpp_name=name, doc=doc))
+        for namespace in parser.namespaces:
+            for enum in namespace.enums:
+                f.write(ENUMS_PXI_TOP.format(basename=basename, enum=enum.name))
+                for name, value in enum.enumerators.items():
+                    doc = reformat_comment(enum.enumerators_doc.get(name, ''))
+                    f.write(ENUMS_ATTR_TEMPLATE.format(name=format_name(name), enum=enum.name, cpp_name=name, doc=doc))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Read a header with enums and generate a '

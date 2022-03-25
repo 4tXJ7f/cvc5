@@ -297,18 +297,18 @@ api::Kind Smt2::getOperatorKind(const std::string& name) const
   return d_operatorKindMap.find(name)->second;
 }
 
-api::BlockModelsMode Smt2::getBlockModelsMode(const std::string& mode)
+modes::BlockModelsMode Smt2::getBlockModelsMode(const std::string& mode)
 {
   if (mode == "literals")
   {
-    return api::BlockModelsMode::LITERALS;
+    return modes::BlockModelsMode::LITERALS;
   }
   else if (mode == "values")
   {
-    return api::BlockModelsMode::VALUES;
+    return modes::BlockModelsMode::VALUES;
   }
   parseError(std::string("Unknown block models mode `") + mode + "'");
-  return api::BlockModelsMode::LITERALS;
+  return modes::BlockModelsMode::LITERALS;
 }
 
 bool Smt2::isOperatorEnabled(const std::string& name) const {

@@ -103,7 +103,7 @@ class Smt2 : public Parser
 
   api::Kind getOperatorKind(const std::string& name) const;
 
-  api::BlockModelsMode getBlockModelsMode(const std::string& mode);
+  modes::BlockModelsMode getBlockModelsMode(const std::string& mode);
 
   bool isOperatorEnabled(const std::string& name) const;
 
