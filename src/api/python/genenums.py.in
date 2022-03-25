@@ -62,6 +62,56 @@ class {enum}(Enum):
 ENUMS_ATTR_TEMPLATE = r'''    {name}=c_{enum}.{value}, """{doc}"""
 '''
 
+# Format Kind Names                                                                         
+# special cases for format_name                                                             
+_IS = '_IS'                                                                                 
+# replacements after some preprocessing                                                     
+replacements = {'Bitvector': 'BV', 'Floatingpoint': 'FP'}
+                                                                                            
+                                                                                            
+def format_name(name):                                                                      
+    '''                                                                                     
+    In the Python API, each Kind name is reformatted for easier use
+                                                                                            
+    The naming scheme is:                                                                   
+       1. capitalize the first letter of each word (delimited by underscores)
+       2. make the rest of the letters lowercase
+       3. replace Floatingpoint with FP                                                     
+       4. replace Bitvector with BV                                                         
+                                                                                            
+    There is one exception:                                                                 
+       FLOATINGPOINT_IS_NAN  --> FPIsNan                                                    
+                                                                                            
+    For every "_IS" in the name, there's an underscore added before step 1,
+       so that the word after "Is" is capitalized
+                                                                                            
+    Examples:                                                                               
+       BITVECTOR_ADD       -->  BVAdd                                                       
+       APPLY_SELECTOR      -->  ApplySelector                                               
+       FLOATINGPOINT_IS_NAN -->  FPIsNan                                                    
+       SET_MINUS            -->  Setminus                                                   
+                                                                                            
+    See the generated .pxi file for an explicit mapping
+    '''                                                                                     
+    name = name.replace(_IS, _IS + US)                                                      
+    words = [w.capitalize() for w in name.lower().split(US)]
+    name = "".join(words)                                                                   
+                                                                                            
+    for og, new in replacements.items():                                                    
+        name = name.replace(og, new)                                                        
+                                                                                            
+    return name                                                                             
+                                                                                            
+comment_repls = {
+    '`Solver::([a-zA-Z]+)\(([^)]*)\)[^`]*`': ':py:meth:`pycvc5.Solver.\\1`',
+}
+
+
+def reformat_comment(comment):
+    for pat, repl in comment_repls.items():
+        comment = re.sub(pat, repl, comment)
+    return comment
+
 def gen_pxd(parser: EnumParser, file_prefix, header):
     with open(file_prefix + ".pxd", "w") as f:
         for enum in parser.enums:
@@ -82,8 +132,8 @@ def gen_pxi(parser : EnumParser, file_prefix):
         for enum in parser.enums:
             f.write(ENUMS_PXI_TOP.format(basename=basename, enum=enum.name))
             for value, name in enum.values.items():
-                doc = enum.values_doc.get(name, '')
-                f.write(ENUMS_ATTR_TEMPLATE.format(name=name, enum=enum.name, value=value, doc=doc))
+                doc = reformat_comment(enum.enumerators_doc.get(name, ''))
+                f.write(ENUMS_ATTR_TEMPLATE.format(name=format_name(name), enum=enum.name, value=value, doc=doc))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Read a header with enums and generate a '

@@ -757,6 +757,15 @@ Node SequencesRewriter::rewriteConcat(Node node)
   return node;
 }
 
+Node SequencesRewriter::rewriteAllRegExp(TNode node)
+{
+  Assert(node.getKind() == kind::REGEXP_ALL);
+  NodeManager* nm = NodeManager::currentNM();
+  // re.all ----> (re.* re.allchar)
+  Node ret = nm->mkNode(REGEXP_STAR, nm->mkNode(REGEXP_ALLCHAR));
+  return returnRewrite(node, ret, Rewrite::RE_ALL_ELIM);
+}
+
 Node SequencesRewriter::rewriteConcatRegExp(TNode node)
 {
   Assert(node.getKind() == kind::REGEXP_CONCAT);
@@ -948,6 +957,15 @@ Node SequencesRewriter::rewriteStarRegExp(TNode node)
   }
   else if (node[0].getKind() == REGEXP_UNION)
   {
+    for (const Node& nc : node[0])
+    {
+      if (nc.getKind() == REGEXP_ALLCHAR)
+      {
+        // (re.* (re.union ... re.allchar ...)) ---> (re.* re.allchar)
+        retNode = nm->mkNode(REGEXP_STAR, nc);
+        return returnRewrite(node, retNode, Rewrite::RE_STAR_UNION_CHAR);
+      }
+    }
     // simplification of unions under star
     if (RegExpEntail::hasEpsilonNode(node[0]))
     {
@@ -1654,6 +1672,10 @@ RewriteResponse SequencesRewriter::postRewrite(TNode node)
   else if (nk == kind::STRING_IN_REGEXP)
   {
     retNode = rewriteMembership(node);
+  }
+  else if (nk == REGEXP_ALL)
+  {
+    retNode = rewriteAllRegExp(node);
   }
   else if (nk == REGEXP_CONCAT)
   {
@@ -2527,27 +2549,33 @@ Node SequencesRewriter::rewriteIndexof(Node node)
     cvc5::Rational rMaxInt(cvc5::String::maxSize());
     if (node[2].getConst<Rational>() > rMaxInt)
     {
-      // We know that, due to limitations on the size of string constants
-      // in our implementation, that accessing a position greater than
-      // rMaxInt is guaranteed to be out of bounds.
-      Node negone = nm->mkConstInt(Rational(-1));
-      return returnRewrite(node, negone, Rewrite::IDOF_MAX);
+      if (node[0].isConst())
+      {
+        // We know that, due to limitations on the size of string constants
+        // in our implementation, that accessing a position greater than
+        // rMaxInt is guaranteed to be out of bounds.
+        Node negone = nm->mkConstInt(Rational(-1));
+        return returnRewrite(node, negone, Rewrite::IDOF_MAX);
+      }
     }
-    Assert(node[2].getConst<Rational>().sgn() >= 0);
-    Node s = children0[0];
-    Node t = node[1];
-    uint32_t start =
-        node[2].getConst<Rational>().getNumerator().toUnsignedInt();
-    std::size_t ret = Word::find(s, t, start);
-    if (ret != std::string::npos)
+    else
     {
-      Node retv = nm->mkConstInt(Rational(static_cast<unsigned>(ret)));
-      return returnRewrite(node, retv, Rewrite::IDOF_FIND);
-    }
-    else if (children0.size() == 1)
-    {
-      Node negone = nm->mkConstInt(Rational(-1));
-      return returnRewrite(node, negone, Rewrite::IDOF_NFIND);
+      Assert(node[2].getConst<Rational>().sgn() >= 0);
+      Node s = children0[0];
+      Node t = node[1];
+      uint32_t start =
+          node[2].getConst<Rational>().getNumerator().toUnsignedInt();
+      std::size_t ret = Word::find(s, t, start);
+      if (ret != std::string::npos)
+      {
+        Node retv = nm->mkConstInt(Rational(static_cast<unsigned>(ret)));
+        return returnRewrite(node, retv, Rewrite::IDOF_FIND);
+      }
+      else if (children0.size() == 1)
+      {
+        Node negone = nm->mkConstInt(Rational(-1));
+        return returnRewrite(node, negone, Rewrite::IDOF_NFIND);
+      }
     }
   }
 
@@ -3650,7 +3678,9 @@ Node SequencesRewriter::rewriteSeqUnit(Node node)
   {
     std::vector<Node> seq;
     seq.push_back(node[0]);
-    TypeNode stype = node[0].getType();
+    // important to take the type according to the operator here, not the
+    // type of the argument
+    TypeNode stype = node.getType().getSequenceElementType();
     Node ret = nm->mkConst(Sequence(stype, seq));
     return returnRewrite(node, ret, Rewrite::SEQ_UNIT_EVAL);
   }

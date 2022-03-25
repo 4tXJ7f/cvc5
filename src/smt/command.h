@@ -1056,8 +1056,6 @@ class CVC5_EXPORT GetInterpolCommand : public Command
   api::Term d_conj;
   /** The (optional) grammar of the interpolation query */
   api::Grammar* d_sygus_grammar;
-  /** the return status of the command */
-  bool d_resultStatus;
   /** the return expression of the command */
   api::Term d_result;
 }; /* class GetInterpolCommand */
@@ -1085,8 +1083,6 @@ class CVC5_EXPORT GetInterpolNextCommand : public Command
  protected:
   /** The name of the interpolation predicate */
   std::string d_name;
-  /** the return status of the command */
-  bool d_resultStatus;
   /** the return expression of the command */
   api::Term d_result;
 };
@@ -1135,8 +1131,6 @@ class CVC5_EXPORT GetAbductCommand : public Command
   api::Term d_conj;
   /** The (optional) grammar of the abduction query */
   api::Grammar* d_sygus_grammar;
-  /** the return status of the command */
-  bool d_resultStatus;
   /** the return expression of the command */
   api::Term d_result;
 }; /* class GetAbductCommand */
@@ -1163,8 +1157,6 @@ class CVC5_EXPORT GetAbductNextCommand : public Command
  protected:
   /** The name of the abduction predicate */
   std::string d_name;
-  /** the return status of the command */
-  bool d_resultStatus;
   /** the return expression of the command */
   api::Term d_result;
 };
@@ -1256,6 +1248,27 @@ class CVC5_EXPORT GetDifficultyCommand : public Command
   SymbolManager* d_sm;
   /** the result of the get difficulty call */
   std::map<api::Term, api::Term> d_result;
+};
+
+class CVC5_EXPORT GetLearnedLiteralsCommand : public Command
+{
+ public:
+  GetLearnedLiteralsCommand();
+  const std::vector<api::Term>& getLearnedLiterals() const;
+
+  void invoke(api::Solver* solver, SymbolManager* sm) override;
+  void printResult(std::ostream& out) const override;
+
+  Command* clone() const override;
+  std::string getCommandName() const override;
+  void toStream(std::ostream& out,
+                int toDepth = -1,
+                size_t dag = 1,
+                Language language = Language::LANG_AUTO) const override;
+
+ protected:
+  /** the result of the get learned literals call */
+  std::vector<api::Term> d_result;
 };
 
 class CVC5_EXPORT GetAssertionsCommand : public Command

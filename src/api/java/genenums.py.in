@@ -11,7 +11,6 @@
 # directory for licensing information.
 # #############################################################################
 ##
-
 """
 This script reads cvc5/src/api/cpp/cvc5_kind.h and generates
 cvc5/Kind.java file which declares all cvc5 kinds.
@@ -22,7 +21,6 @@ import os
 import sys
 import re
 import textwrap
-
 
 # get access to cvc5/src/api/parseenums.py
 SOURCE_DIR='${CMAKE_SOURCE_DIR}/src'
@@ -120,8 +118,8 @@ def gen_java(parser: EnumParser, path):
         filename = os.path.join(path, enum.name + ".java")
         with open(filename, "w") as f:
             code = ENUM_JAVA_TOP.format(name=enum.name)
-            for name, (fmt_name, value) in enum.enumerators.items():
-                comment = parser.get_comment(fmt_name)
+            for name, value in enum.enumerators.items():
+                comment = enum.enumerators_doc.get(name, '')
                 comment = format_comment(comment)
                 code += "{comment}\n  {name}({enum_value}),\n".format(comment=comment, name=name, enum_value=value)
             code += ENUM_JAVA_BOTTOM
@@ -131,9 +129,11 @@ def gen_java(parser: EnumParser, path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Read a kinds header file and generate a '
                                      'corresponding java file')
-    parser.add_argument('--kinds-header', metavar='<KINDS_HEADER>',
+    parser.add_argument('--kinds-header',
+                        metavar='<KINDS_HEADER>',
                         help='The header file to read kinds from')
-    parser.add_argument('--kinds-file-prefix', metavar='<KIND_FILE_PREFIX>',
+    parser.add_argument('--kinds-file-prefix',
+                        metavar='<KIND_FILE_PREFIX>',
                         help='The prefix for the generated .java file',
                         default=DEFAULT_PREFIX)
 

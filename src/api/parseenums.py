@@ -42,13 +42,6 @@ BLOCK_COMMENT_END = '*/'
 MACRO_BLOCK_BEGIN = '#if 0'
 MACRO_BLOCK_END = '#endif'
 
-# Format Kind Names
-# special cases for format_name
-_IS = '_IS'
-# replacements after some preprocessing
-replacements = {'Bitvector': 'BV', 'Floatingpoint': 'FP'}
-
-
 class CppEnum:
 
     def __init__(self, name):
@@ -85,50 +78,6 @@ class EnumParser:
         Returns the enum that is currently being parsed
         '''
         return self.enums[-1]
-
-    def get_comment(self, enumerator_name):
-        '''
-        Look up a documentation comment for a value by name
-        Accepts both full C++ name and shortened name
-        '''
-        enum = self.get_current_enum()
-        try:
-            return enum.enumerators_doc[enumerator_name]
-        except KeyError:
-            return enum.enumerators_doc[enum.enumerators[enumerator_name]]
-
-    def format_name(self, name):
-        '''
-        In the Python API, each value name is reformatted for easier use
-
-        The naming scheme is:
-           1. capitalize the first letter of each word (delimited by underscores)
-           2. make the rest of the letters lowercase
-           3. replace Floatingpoint with FP
-           4. replace Bitvector with BV
-
-        There is one exception:
-           FLOATINGPOINT_IS_NAN  --> FPIsNan
-
-        For every "_IS" in the name, there's an underscore added before step 1,
-           so that the word after "Is" is capitalized
-
-        Examples:
-           BITVECTOR_ADD       -->  BVAdd
-           APPLY_SELECTOR      -->  ApplySelector
-           FLOATINGPOINT_IS_NAN -->  FPIsNan
-           SET_MINUS            -->  Setminus
-
-        See the generated .pxi file for an explicit mapping
-        '''
-        name = name.replace(_IS, _IS + US)
-        words = [w.capitalize() for w in name.lower().split(US)]
-        name = "".join(words)
-
-        for og, new in replacements.items():
-            name = name.replace(og, new)
-
-        return name
 
     def format_comment(self, comment):
         '''
@@ -217,11 +166,10 @@ class EnumParser:
                     value = self.last_value + 1
                 self.last_value = value
 
-                fmt_name = self.format_name(name)
                 enum = self.get_current_enum()
-                enum.enumerators[name] = (fmt_name, value)
+                enum.enumerators[name] = value
                 fmt_comment = self.format_comment(self.latest_block_comment)
-                enum.enumerators_doc[fmt_name] = fmt_comment
+                enum.enumerators_doc[name] = fmt_comment
             elif ENUM_START in line:
                 self.in_enum = True
                 # Parse the enum name for enums of the form `enum Foo` as well
