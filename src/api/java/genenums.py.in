@@ -23,7 +23,7 @@ import re
 import textwrap
 
 # get access to cvc5/src/api/parseenums.py
-SOURCE_DIR='${CMAKE_SOURCE_DIR}/src'
+SOURCE_DIR = '${CMAKE_SOURCE_DIR}/src'
 sys.path.insert(0, os.path.abspath(f'{SOURCE_DIR}/api'))
 
 from parseenums import *
@@ -122,7 +122,8 @@ def gen_java(parser: EnumParser, path):
                 for name, value in enum.enumerators.items():
                     comment = enum.enumerators_doc.get(name, '')
                     comment = format_comment(comment)
-                    code += "{comment}\n  {name}({enum_value}),\n".format(comment=comment, name=name, enum_value=value)
+                    code += "{comment}\n  {name}({enum_value}),\n".format(
+                        comment=comment, name=name, enum_value=value)
                 code += ENUM_JAVA_BOTTOM
                 f.write(code)
 

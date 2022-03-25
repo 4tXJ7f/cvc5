@@ -11,7 +11,6 @@
 # directory for licensing information.
 # #############################################################################
 ##
-
 """
 This script reads a file that defines enums and generates .pxd and .pxi files
 which declare all the enum values and implement a Python wrapper for values,
@@ -28,7 +27,7 @@ import re
 import sys
 
 # get access to cvc5/src/api/parseenums.py
-SOURCE_DIR='${CMAKE_SOURCE_DIR}/src'
+SOURCE_DIR = '${CMAKE_SOURCE_DIR}/src'
 sys.path.insert(0, os.path.abspath(f'{SOURCE_DIR}/api'))
 
 from parseenums import *
@@ -37,7 +36,7 @@ from parseenums import *
 DEFAULT_PREFIX = 'kinds'
 
 ################ Comments and Macro Tokens ############
-PYCOMMENT           = '#'
+PYCOMMENT = '#'
 
 ENUMS_PXD_TOP_TEMPLATE = \
 r"""cdef extern from "{header}" namespace "{namespace}":
@@ -63,14 +62,14 @@ class {enum}(Enum):
 ENUMS_ATTR_TEMPLATE = r'''    {name}=c_{enum}.{cpp_name}, """{doc}"""
 '''
 
-# Format Kind Names                                                                         
-# special cases for format_name                                                             
-_IS = '_IS'                                                                                 
-# replacements after some preprocessing                                                     
+# Format Kind Names
+# special cases for format_name
+_IS = '_IS'
+# replacements after some preprocessing
 replacements = {'Bitvector': 'BV', 'Floatingpoint': 'FP'}
-                                                                                            
-                                                                                            
-def format_name(name):                                                                      
+
+
+def format_name(name):
     '''                                                                                     
     In the Python API, each Kind name is reformatted for easier use
                                                                                             
@@ -93,16 +92,17 @@ def format_name(name):
        SET_MINUS            -->  Setminus                                                   
                                                                                             
     See the generated .pxi file for an explicit mapping
-    '''                                                                                     
-    name = name.replace(_IS, _IS + US)                                                      
+    '''
+    name = name.replace(_IS, _IS + US)
     words = [w.capitalize() for w in name.lower().split(US)]
-    name = "".join(words)                                                                   
-                                                                                            
-    for og, new in replacements.items():                                                    
-        name = name.replace(og, new)                                                        
-                                                                                            
-    return name                                                                             
-                                                                                            
+    name = "".join(words)
+
+    for og, new in replacements.items():
+        name = name.replace(og, new)
+
+    return name
+
+
 comment_repls = {
     '`Solver::([a-zA-Z]+)\(([^)]*)\)[^`]*`': ':py:meth:`pycvc5.Solver.\\1`',
 }
@@ -112,6 +112,7 @@ def reformat_comment(comment):
     for pat, repl in comment_repls.items():
         comment = re.sub(pat, repl, comment)
     return comment
+
 
 def gen_pxd(parser: EnumParser, file_prefix, header):
     with open(file_prefix + ".pxd", "w") as f:
@@ -125,33 +126,47 @@ def gen_pxd(parser: EnumParser, file_prefix, header):
                     if not line.isspace():
                         f.write(line)
                     f.write(NL)
-                f.write(ENUMS_PXD_TOP_TEMPLATE.format(header=header[len(SOURCE_DIR) + 1:], enum=enum.name, namespace=namespace.name))
+                f.write(
+                    ENUMS_PXD_TOP_TEMPLATE.format(header=header[len(SOURCE_DIR)
+                                                                + 1:],
+                                                  enum=enum.name,
+                                                  namespace=namespace.name))
                 for enumerator in enum.enumerators:
                     f.write("       {},\n".format(enumerator))
 
-def gen_pxi(parser : EnumParser, file_prefix):
+
+def gen_pxi(parser: EnumParser, file_prefix):
     basename = file_prefix[file_prefix.rfind("/") + 1:]
     with open(file_prefix + ".pxi", "w") as f:
         for namespace in parser.namespaces:
             for enum in namespace.enums:
-                f.write(ENUMS_PXI_TOP.format(basename=basename, enum=enum.name))
+                f.write(ENUMS_PXI_TOP.format(basename=basename,
+                                             enum=enum.name))
                 for name, value in enum.enumerators.items():
                     doc = reformat_comment(enum.enumerators_doc.get(name, ''))
-                    f.write(ENUMS_ATTR_TEMPLATE.format(name=format_name(name), enum=enum.name, cpp_name=name, doc=doc))
+                    f.write(
+                        ENUMS_ATTR_TEMPLATE.format(name=format_name(name),
+                                                   enum=enum.name,
+                                                   cpp_name=name,
+                                                   doc=doc))
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser('Read a header with enums and generate a '
-                         'corresponding pxd file, with simplified enum names.')
-    parser.add_argument('--enums-header', metavar='<ENUMS_HEADER>',
+    parser = argparse.ArgumentParser(
+        'Read a header with enums and generate a '
+        'corresponding pxd file, with simplified enum names.')
+    parser.add_argument('--enums-header',
+                        metavar='<ENUMS_HEADER>',
                         help='The header file to read enums from')
-    parser.add_argument('--enums-file-prefix', metavar='<ENUMS_FILE_PREFIX>',
+    parser.add_argument('--enums-file-prefix',
+                        metavar='<ENUMS_FILE_PREFIX>',
                         help='The prefix for the .pxd and .pxi files to write '
                         'the Cython declarations to.',
                         default=DEFAULT_PREFIX)
 
-    args               = parser.parse_args()
-    enums_header       = args.enums_header
-    enums_file_prefix  = args.enums_file_prefix
+    args = parser.parse_args()
+    enums_header = args.enums_header
+    enums_file_prefix = args.enums_file_prefix
 
     kp = EnumParser()
     kp.parse(enums_header)

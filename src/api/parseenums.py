@@ -44,6 +44,7 @@ BLOCK_COMMENT_END = '*/'
 MACRO_BLOCK_BEGIN = '#if 0'
 MACRO_BLOCK_END = '#endif'
 
+
 class CppNamespace:
 
     def __init__(self, name):
@@ -51,6 +52,7 @@ class CppNamespace:
         self.name = name
         # The enums in this namespace
         self.enums = []
+
 
 class CppEnum:
 
