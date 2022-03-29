@@ -27,5 +27,6 @@ Non-standard or extended theories
 
    datatypes
    separation-logic
+   sequences
    sets-and-relations
    transcendentals
