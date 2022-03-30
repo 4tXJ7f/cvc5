@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+type: conference-paper
+message: "If you use cvc5, please cite it as below."
+title: "cvc5: A Versatile and Industrial-Strength {SMT} Solver"
+authors:
+  - family-names: Barbosa
+    given-names: Haniel
+  - family-names: Barrett
+    given-names: Clark
+  - family-names: Brain
+    given-names: Martin
+  - family-names: Kremer
+    given-names: Gereon
+  - family-names: Lachnitt
+    given-names: Hanna
+  - family-names: Mann
+    given-names: Makai
+  - family-names: Mohamed
+    given-names: Abdalrhman
+  - family-names: Mohamed
+    given-names: Mudathir
+  - family-names: Niemetz
+    given-names: Aina
+  - family-names: Nötzli
+    given-names: Andres
+  - family-names: Ozdemir
+    given-names: Alex
+  - family-names: Preiner
+    given-names: Mathias
+  - family-names: Reynolds
+    given-names: Andrew
+  - family-names: Sheng
+    given-names: Ying
+  - family-names: Tinelli
+    given-names: Cesare
+  - family-names: Zohar
+    given-names: Yoni
+doi: "10.1007/978-3-030-99524-9_24"
+publisher: "Springer International Publishing"
