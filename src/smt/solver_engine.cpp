@@ -901,6 +901,14 @@ void SolverEngine::assertSygusInvConstraint(Node inv,
   d_sygusSolver->assertSygusInvConstraint(inv, pre, trans, post);
 }
 
+void SolverEngine::sygusOracle(
+    std::function<std::vector<Node>(const std::vector<Node>&)> fn) const
+{
+  NodeManager* nm = getNodeManager();
+  std::vector<Node> result = fn({nm->mkConstInt(1)});
+  std::cout << "Result from oracle " << result << std::endl;
+}
+
 SynthResult SolverEngine::checkSynth(bool isNext)
 {
   SolverEngineScope smts(this);

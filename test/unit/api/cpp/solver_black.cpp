@@ -3373,5 +3373,13 @@ TEST_F(TestApiBlackSolver, projIssue337)
   ASSERT_EQ(t.getSort(), tt.getSort());
 }
 
+TEST_F(TestApiBlackSolver, oracleFun)
+{
+  d_solver.sygusOracle(
+      [&](const std::vector<Term>& terms) -> std::vector<Term> {
+        return {d_solver.simplify(d_solver.mkTerm(ADD, {terms[0], terms[0]}))};
+      });
+}
+
 }  // namespace test
 }  // namespace cvc5::internal

@@ -7553,6 +7553,15 @@ void Solver::addSygusInvConstraint(Term inv,
   CVC5_API_TRY_CATCH_END;
 }
 
+void Solver::sygusOracle(
+    std::function<std::vector<Term>(const std::vector<Term>&)> fn) const
+{
+  d_slv->sygusOracle([&](const std::vector<internal::Node> nodes) {
+    std::vector<Term> terms = Term::nodeVectorToTerms(this, nodes);
+    return Term::termVectorToNodes(fn(terms));
+  });
+}
+
 SynthResult Solver::checkSynth() const
 {
   CVC5_API_TRY_CATCH_BEGIN;

@@ -18,6 +18,7 @@
 #ifndef CVC5__API__CVC5_H
 #define CVC5__API__CVC5_H
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -4895,6 +4896,9 @@ class CVC5_EXPORT Solver
    * @param post The post-condition.
    */
   void addSygusInvConstraint(Term inv, Term pre, Term trans, Term post) const;
+
+  void sygusOracle(
+      std::function<std::vector<Term>(const std::vector<Term>&)> fn) const;
 
   /**
    * Try to find a solution for the synthesis conjecture corresponding to the

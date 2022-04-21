@@ -426,6 +426,10 @@ class CVC5_EXPORT SolverEngine
    * invariant-to-synthesize.
    */
   void assertSygusInvConstraint(Node inv, Node pre, Node trans, Node post);
+
+  void sygusOracle(
+      std::function<std::vector<Node>(const std::vector<Node>&)> fn) const;
+
   /**
    * Assert a synthesis conjecture to the current context and call
    * check().  Returns sat, unsat, or unknown result.
