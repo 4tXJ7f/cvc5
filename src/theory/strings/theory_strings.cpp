@@ -800,6 +800,25 @@ void TheoryStrings::preRegisterTerm(TNode n)
   Trace("strings-preregister")
       << "TheoryStrings::preRegisterTerm: " << n << std::endl;
   d_termReg.preRegisterTerm(n);
+
+  TypeNode tn = n.getType();
+  if (tn.isBoolean())
+  {
+    Kind k = n.getKind();
+    // All kinds that we do congruence over that may return a Boolean go here
+    if (k == EQUAL || k == STRING_CONTAINS || k == STRING_LEQ || k == SEQ_NTH
+        || k == STRING_IN_REGEXP)
+    {
+      // Get triggered for both equal and dis-equal
+      d_equalityEngine->addTriggerPredicate(n);
+      if (k == STRING_IN_REGEXP)
+      {
+        d_im.requirePhase(n, true);
+        d_equalityEngine->addTerm(n[0]);
+        d_equalityEngine->addTerm(n[1]);
+      }
+    }
+  }
 }
 
 bool TheoryStrings::preNotifyFact(

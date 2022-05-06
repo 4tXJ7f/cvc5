@@ -248,23 +248,7 @@ void TermRegistry::notifyRelevant(TNode n)
 
   TypeNode tn = n.getType();
   Kind k = n.getKind();
-  if (tn.isBoolean())
-  {
-    // All kinds that we do congruence over that may return a Boolean go here
-    if (k == EQUAL || k == STRING_CONTAINS || k == STRING_LEQ || k == SEQ_NTH
-        || k == STRING_IN_REGEXP)
-    {
-      // Get triggered for both equal and dis-equal
-      ee->addTriggerPredicate(n);
-      if (k == STRING_IN_REGEXP)
-      {
-        d_im->requirePhase(n, true);
-        ee->addTerm(n[0]);
-        ee->addTerm(n[1]);
-      }
-    }
-  }
-  else
+  if (!tn.isBoolean())
   {
     // Function applications
     ee->addTerm(n);
