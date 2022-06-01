@@ -1,8 +1,4 @@
-on:
-  release:
-    types: [published, push, pull_request]
-  schedule:
-    - cron: '0 1 * * *'
+on: [push, pull_request]
 
 name: PyPi packaging
 
