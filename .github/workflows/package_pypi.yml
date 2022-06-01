@@ -48,4 +48,4 @@ jobs:
     - name: Upload wheel artifact
       uses: actions/upload-artifact@v2
       with:
-        path: *.whl
+        path: '*.whl'
