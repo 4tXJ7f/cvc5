@@ -1,6 +1,6 @@
 on:
   release:
-    types: [published]
+    types: [published, push, pull_request]
   schedule:
     - cron: '0 1 * * *'
 
@@ -49,3 +49,7 @@ jobs:
         test-pypi-token: ${{ secrets.PYPI_TOKEN }}
         pypi-token: ${{ secrets.PYPI_TOKEN }}
 
+    - name: Upload wheel artifact
+      uses: actions/upload-artifact@v2
+      with:
+        path: *.whl
