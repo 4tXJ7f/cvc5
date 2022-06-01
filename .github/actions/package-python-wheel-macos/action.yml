@@ -1,6 +1,8 @@
 name: Package python wheel for macOS
 description: Package cvc5 into a python wheel on macOS for one python version
 inputs:
+  arch:
+    default: "x86-64"
   python-version:
     default: ""
 runs:
@@ -11,14 +13,22 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
     
-    - name: Build wheel
+    - name: Build wheel (x86-64)
       shell: bash
-      if: runner.os == 'macOS'
+      if: (runner.os == 'macOS') && (inputs.arch == 'x86-64')
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.13
       run: |
-        echo "::group::Build macOS wheel for ${{ inputs.python-version }}"
+        echo "::group::Build macOS wheel for ${{ inputs.python-version }} (${{ inputs.arch }})"
         ./contrib/packaging_python/mk_clean_wheel.sh python "production --auto-download"
+        echo "::endgroup::"
 
-        ls *.whl
+    - name: Build wheel (arm64)
+      shell: bash
+      if: (runner.os == 'macOS') && (inputs.arch == 'arm64')
+      env:
+        MACOSX_DEPLOYMENT_TARGET: 10.13
+      run: |
+        echo "::group::Build macOS wheel for ${{ inputs.python-version }} (${{ inputs.arch }})"
+        ./contrib/packaging_python/mk_clean_wheel.sh python "production --auto-download --arm64"
         echo "::endgroup::"

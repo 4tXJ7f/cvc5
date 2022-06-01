@@ -6,7 +6,18 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        include:
+          - name: ubuntu 
+            os: ubuntu-latest
+            arch: x86-64
+
+          - name: macos
+            os: macos-latest
+            arch: x86-64
+
+          - name: macos-arm64
+            os: macos-latest
+            arch: arm64
 
     runs-on: ${{ matrix.os }}
     if: (github.repository == 'cvc5/cvc5') || (github.event_name != 'schedule')
@@ -40,6 +51,7 @@ jobs:
     - name: Package PyPi wheel packages
       uses: ./.github/actions/package-python-wheel
       with:
+        arch: ${{ matrix.arch }}
         upload-to-pypi: ${{ github.event_name == 'release' }}
         upload-to-test-pypi: false
         test-pypi-token: ${{ secrets.PYPI_TOKEN }}

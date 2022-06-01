@@ -1,6 +1,8 @@
 name: Package python wheels
 description: Package cvc5 into python wheels for all supported python versions
 inputs:
+  arch:
+    default: "x86-64"
   upload-to-pypi:
     default: false
   upload-to-test-pypi:
@@ -40,42 +42,49 @@ runs:
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: '3.6'
 
     - name: Build wheels for macOS
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: '3.7'
 
     - name: Build wheels for macOS
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: '3.8'
 
     - name: Build wheels for macOS
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: '3.9'
 
     - name: Build wheels for macOS
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: '3.10'
 
     - name: Build wheels for macOS
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: 'pypy-3.7'
         
     - name: Build wheels for macOS
       if: runner.os == 'macOS'
       uses: ./.github/actions/package-python-wheel-macos
       with:
+        arch: ${{ inputs.arch }}
         python-version: 'pypy-3.8'
 
     - name: Upload wheels to pypi.org
